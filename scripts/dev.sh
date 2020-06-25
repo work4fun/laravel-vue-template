@@ -7,9 +7,6 @@ cd "$SCRIPTS_DIR" || exit;
 # shellcheck source=detect-docker.sh
 source "$SCRIPTS_DIR/scripts/detect-docker.sh"
 
-### login git hub docker repo
-echo 7ce4f9e1fa44cc00339094d3a0d9b5adf01f9d78 | docker login docker.pkg.github.com -u HongjiangHuang --password-stdin
-
 mv "$SCRIPTS_DIR/laravel/.env.example" "$SCRIPTS_DIR/laravel/.env"
 
 ### using dev php config
