@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPTS_DIR="$(dirname "${BASH_SOURCE[@]}")"
+
+cd "$SCRIPTS_DIR" || exit;
+
+# shellcheck source=detect-docker.sh
+source "$SCRIPTS_DIR/scripts/detect-docker.sh"
+
+# call laravel artisan with docker
+docker-compose exec cli-app ./artisan "$@"

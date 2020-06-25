@@ -1,0 +1,79 @@
+version: "3"
+services:
+
+  postgres-db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: dashboard
+      POSTGRES_PASSWORD: rA@fvd-MQAcs*4K9yvx.2dwqPjvY8t
+      POSTGRES_DB:  dashboard
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - ./storage/pgdata:/var/lib/postgresql/data
+
+  fastcgi-app:
+    image: docker.pkg.github.com/stoneycreeky/dashboard/dashboard-fastcgi:1.7
+    restart: always
+    ports:
+      - 9000:9000
+    depends_on:
+      - postgres-db
+    links:
+      - postgres-db
+    volumes:
+      - ./laravel:/opt/app
+      - ${ini_file:-./config/php-fpm/php.ini}:/usr/local/etc/php/php.ini
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_DATABASE: dashboard
+      DB_USERNAME: dashboard
+      DB_PASSWORD: rA@fvd-MQAcs*4K9yvx.2dwqPjvY8t
+
+  nodejs:
+    image: node:12.18.0-stretch
+    working_dir: /opt/app
+    restart: always
+    tty: true
+    privileged: true
+    entrypoint: [ "bash" ]
+    volumes:
+      - ./laravel:/opt/app
+
+  cli-app:
+    image: docker.pkg.github.com/stoneycreeky/dashboard/dashboard-cli:1.7
+    restart: always
+    tty: true
+    privileged: true
+    entrypoint: [ "bash" ]
+    depends_on:
+      - postgres-db
+    links:
+      - postgres-db
+    volumes:
+      - ./laravel:/opt/app
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_DATABASE: dashboard
+      DB_USERNAME: dashboard
+      DB_PASSWORD: rA@fvd-MQAcs*4K9yvx.2dwqPjvY8t
+
+  nginx:
+    image: nginx:latest
+    restart: always
+    depends_on:
+      - fastcgi-app
+    links:
+      - fastcgi-app
+    ports:
+      - "80:80"
+    volumes:
+      - ./logs/nginx:/mnt/nginx/logs
+      - ./laravel:/opt/app
+      - ./config/nginx:/etc/nginx
