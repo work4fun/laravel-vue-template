@@ -35,4 +35,7 @@ docker-compose restart
 
 echo "Start dashboard successful!"
 
-echo "http://127.0.0.1:80"
+for ip in $(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+do
+  echo "http://${ip}";
+done
